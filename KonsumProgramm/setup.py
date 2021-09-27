@@ -17,12 +17,11 @@ from cx_Freeze import setup, Executable
 setup(
       name='Consum Tracker',                                                    # Name of the application
       version='1.0',                                                            # Main Version
-      description='Simulator for FLG Communication',                            # Description
+      description='A Tracker for your daily consums ffor different things',                            # Description
       author='Raphael Romann',                                                  # Autor
       author_email='admin@example.com',                                         # E-Mail
-      py_modules = ["main", "dbconsum"],                                        # onwn used package
+      py_modules = ["main", "dbconsum", "log"],                                        # onwn used package
       package_data = {"main" : ["consum.ui"]},                                  #other addicted files for the programm
       executables = [Executable("main.py")]                                     # Main python script file defined as console application
-
 
 )

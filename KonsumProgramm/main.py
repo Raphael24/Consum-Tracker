@@ -1,5 +1,4 @@
 #!/usr/bin/python
-
 """
 Dies ist ein Docstring von Consumtracker
 """
@@ -10,6 +9,7 @@ from PyQt5.QtCore import QDate
 import dbConsum as db
 import time
 import logging
+import log as log
 
 consumlogger = logging.getLogger("ConsumLogger")
 consumlogger.setLevel(logging.INFO)
@@ -18,10 +18,7 @@ fh = logging.FileHandler('KonsumProgramm\Main.log')
 fh.setLevel(logging.INFO)
 frm = logging.Formatter("{asctime} {levelname:8} {message}", "%Y.%m.%d %H:%M:%S", style="{")
 fh.setFormatter(frm)
-
 consumlogger.addHandler(fh)
-
-
 
 
 class ConsumUI(QtWidgets.QDialog):  #class ConsumUI
@@ -44,10 +41,18 @@ class ConsumUI(QtWidgets.QDialog):  #class ConsumUI
         self.init_ComboBox_Database()
         self.ui.CB_Database.currentIndexChanged.connect(self.changeDatabase)
 
-        #Connect Buttons
+        # Buttons Datenbank
         self.ui.Btn_Consum.clicked.connect(self.Consum)
         self.ui.Btn_Exit.clicked.connect(self.Exit)
         self.ui.Btn_LoadData.clicked.connect(self.loadData)
+
+        # Buttons Log
+
+        self.ui.Btn_ShowLogMain.clicked.connect(lambda: self.show_log(0))
+        self.ui.Btn_ShowLogDB.clicked.connect(lambda: self.show_log(1))
+        self.ui.Btn_DeleteMain.clicked.connect(lambda: self.delete_log(0))
+        self.ui.Btn_DeleteDB.clicked.connect(lambda: self.delete_log(1))
+        self.ui.Btn_ClearLog.clicked.connect(self.clear_log)
 
         #Buttons Admin
         self.ui.Btn_admin_Insertdata.clicked.connect(db.insert)
@@ -134,7 +139,7 @@ class ConsumUI(QtWidgets.QDialog):  #class ConsumUI
             item = items[0]                                                     #read the item on position number 0 (x, y, z)
             numb = str(items[1])                                                #read the item on position number 1 (x, y, z)g
             tag = items[2]
-            #print("Item: ",item, "Number:",numb,"Tag: ",tag)            #log Message
+            #print("Item: ",item, "Number:",numb,"Tag: ",tag)                   #log Message
             #print("TAG", items[2], type(items[2]))
             items = [item, tag, numb]                                            #a list of all items from one queue
             for m in range(0,3):                                                # write the items in the table Widget
@@ -164,16 +169,15 @@ class ConsumUI(QtWidgets.QDialog):  #class ConsumUI
 
 
     #---- Write Data -----------------------------------------------------------
+
     def createDatabase(self):
         name = self.ui.LE_NameDatabase.text()
         db.newDatabase(name)
         self.init_ComboBox_Database()
         consumlogger.log(logging.INFO, "Create Database: " + name )
 
-
-
-
     #---- Delete Data ----------------------------------------------------------
+
     def delete(self):
         tag = self.ui.I_DeleteDate.date().toPyDate()
         item = self.ui.CB_DeleteData.currentText()
@@ -185,7 +189,6 @@ class ConsumUI(QtWidgets.QDialog):  #class ConsumUI
             self.init_ComboBox_Database()
             self.LoadDataAdmin()
 
-
     def deletFullData(self):
         item = self.ui.CB_DeleteFullData.currentText()
         if item == "":
@@ -196,7 +199,23 @@ class ConsumUI(QtWidgets.QDialog):  #class ConsumUI
             self.init_ComboBox_Database()
             self.LoadDataAdmin()
 
+    #---- Log ----------------------------------------------------------------
+
+    def show_log(self, i):
+        self.ui.LW_ListLog.clear()
+        Inhalt = log.showlog(i)
+        for m in Inhalt:
+            self.ui.LW_ListLog.addItem(m)
+
+    def clear_log(self):
+        self.ui.LW_ListLog.clear()
+
+    def delete_log(self, i):
+        log.deletelog(i)
+        self.show_log(i)
+
     #---- Tests ----------------------------------------------------------------
+
     def Test1(self):
         consumlogger.log(logging.INFO, "----- RUN TEST -----")
         self.Consum()
@@ -217,8 +236,6 @@ class ConsumUI(QtWidgets.QDialog):  #class ConsumUI
         self.deletFullData()
         print("Run Test OK 7")
         consumlogger.log(logging.INFO, "----- END TEST -----")
-
-
 
     def Exit(self):
         self.close()
