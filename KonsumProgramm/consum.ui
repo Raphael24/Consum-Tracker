@@ -39,7 +39,7 @@
       <string/>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>3</number>
      </property>
      <widget class="QWidget" name="Home">
       <attribute name="title">
@@ -408,9 +408,9 @@
                 </widget>
                </item>
                <item>
-                <widget class="QPushButton" name="Btn_admin_Function2">
+                <widget class="QPushButton" name="Btn_Test1">
                  <property name="text">
-                  <string>Funktion 2</string>
+                  <string>Test 1</string>
                  </property>
                 </widget>
                </item>

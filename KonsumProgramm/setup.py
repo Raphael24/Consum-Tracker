@@ -1,4 +1,3 @@
-
 # Usage of this setup Script to generate an exe
 #
 # 0. Install the normal Python interpretor!
@@ -12,21 +11,18 @@
 # 24.09.2021
 
 
-from distutils.core import setup
-import py2exe
-
+#from setuptools import setup
+from cx_Freeze import setup, Executable
 
 setup(
-      console=['main.py'],                                                      # Main python script file defined as console application
       name='Consum Tracker',                                                    # Name of the application
       version='1.0',                                                            # Main Version
       description='Simulator for FLG Communication',                            # Description
       author='Raphael Romann',                                                  # Autor
       author_email='admin@example.com',                                         # E-Mail
-      packages=['src'],                                                         # onwn used package
+      py_modules = ["main", "dbconsum"],                                        # onwn used package
+      package_data = {"main" : ["consum.ui"]},                                  #other addicted files for the programm
+      executables = [Executable("main.py")]                                     # Main python script file defined as console application
 
-      data_files=[('xml', ['xml/receive.xml', 'xml/simconfig.xml']),            # include example file to the distibution
-                  ('script', ['script/down.fss', 'script/start.fss', 'script/Komp1_6.fss']),
-                  ]
 
 )

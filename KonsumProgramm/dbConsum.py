@@ -5,14 +5,20 @@ import random
 import logging
 
 #configuration Logging
-logging.basicConfig(filename = "DBconsum.log",
-                    level = logging.INFO,
-                    style = "{",
-                    format = "{asctime} {levelname:8} {message}",
-                    datefmt = "%Y-%m-%d %H:%M:%S")
+consumlogger = logging.getLogger("ConsumLoggerDB")
+consumlogger.setLevel(logging.INFO)
+
+fh = logging.FileHandler('KonsumProgramm\Database.log')
+fh.setLevel(logging.INFO)
+frm = logging.Formatter("{asctime} {levelname:8} {message}", "%Y.%m.%d %H:%M:%S", style="{")
+fh.setFormatter(frm)
+
+consumlogger.addHandler(fh)
+consumlogger.info('-------------------- Start Database programm --------------------')
+
 
 #Database connection
-connection = sqlite3.connect("D:\Projekt1\KonsumProgramm\consum.db")
+connection = sqlite3.connect("KonsumProgramm\consum.db")
 cur = connection.cursor()
 
 #Database Structure
@@ -42,24 +48,24 @@ def insert_Consum(NumbOfConsum, item="Huere Michi"):
         data = cur.fetchone()
         #print("Zeit:", data, type(data))
         if data is None:
-            print("Es wurde kein Passender Datensatz gefunden:", item, NumbOfConsum, now, tag)
+            #print("Es wurde kein Passender Datensatz gefunden:", item, NumbOfConsum, now, tag)
             cur.execute("INSERT INTO consum(item, NumbOfConsum, datum, tag) VALUES (?, ?, ?, ?)", (item, NumbOfConsum, now, tag))
             #print("commit")
             connection.commit()
-            print("Succesfully INSERT: ", NumbOfConsum, item)
-            logging.log(logging.INFO, "Datensatz wurde erfolgreich erstellt")
+            consumlogger.info("Datensatz: " + item + " wurde erfolgreich erstellt")
+            #print("Succesfully INSERT: ", NumbOfConsum, item)
         else:
             print("Es wurde ein Passender Datensatz gefunden")
             #print("Datenüberprüfen:", NumbOfConsum, type(NumbOfConsum), tag,type(tag), item,type(item))
             cur.execute("UPDATE consum SET NumbOfConsum=:value1 WHERE tag=:tag AND item=:item", {"value1" : NumbOfConsum, "tag" : tag, "item" : item})
-            print("Succesfully UPDATE: ", NumbOfConsum, item)
             connection.commit()
-            logging.log(logging.INFO, "Datensatz wurde erfolgreich Aktualisiert")
+            print("Succesfully UPDATE: ", NumbOfConsum, item)
+            consumlogger.info("Datensatz: " + item + " wurde erfolgreich Aktualisiert: " + str(NumbOfConsum))
 
     except:
-        print("INSERT_COMSUM: Ein Problem trat auf -> Rollback")
-        logging.log(logging.ERROR, "INSERT_COMSUM: Ein Problem trat auf -> Rollback")
+        #print("INSERT_COMSUM: Ein Problem trat auf -> Rollback")
         connection.rollback()
+        consumlogger.Error("INSERT_COMSUM: Ein Problem trat(" + item + ") auf -> Rollback")
 
 
 def insert(): #only for Admins
@@ -72,16 +78,14 @@ def insert(): #only for Admins
         item = "Huere Michi"
         for i in range(1,2):
             NumbOfConsum = (random.randint(1,10))
-            print("Es wird ein neuer Datensatz erstellt")
             cur.execute("INSERT INTO consum(item, NumbOfConsum, datum, tag) VALUES (?, ?, ?, ?)", (item, NumbOfConsum, now, tag))
-            print("commit")
             connection.commit()
-            print("Succesfully Insert TEST: ", NumbOfConsum)
-            logging.log(logging.DEBUG, "Datensatz wurde erfolgreich erstellt TEST")
+            #print("Succesfully Insert TEST: ", NumbOfConsum)
+            consumlogger.info("TEST INSERT: Datensatz wurde erfolgreich erstellt.")
     except:
-        logging.log(logging.DEBUG, "INSERT: Ein Problem trat auf -> Rollback")
-        print("INSERT: Ein Problem trat auf -> Rollback")
+        #print("INSERT: Ein Problem trat auf -> Rollback")
         connection.rollback()
+        consumlogger.info("TEST INSERT: Ein Problem trat auf -> Rollback")
 
 def newDatabase(item):
     try:
@@ -93,15 +97,17 @@ def newDatabase(item):
         data = cur.fetchone()
 
         if data is None:
-            print("Es wird ein neuer Eintrag erstellt")
+            #print("Es wird ein neuer Eintrag erstellt")
             cur.execute("INSERT INTO consum(item, NumbOfConsum, datum, tag) values(?, ?, ?, ?)", (item, 0, now, tag))
             connection.commit()
-            print("Succesfully Insert Database: ", item)
+            #print("Succesfully Insert Database: ", item)
+            consumlogger.info("INSERT NEW DATABASE: " + item)
         else:
-            print("Datensatz bereits Vorhanden")
+            #print("Datensatz bereits Vorhanden")
+            consumlogger.info("INSERT NEW DATABASE: " + item + " ist bereits vorhanden")
     except:
-        logging.log(logging.DEBUG, "INSERT: Ein Problem trat auf -> Rollback")
-        print("INSERT NEW DATABASE: Ein Problem trat auf -> Rollback")
+        consumlogger.error("INSERT NEW DATABASE: Ein Problem trat auf -> Rollback")
+        #print("INSERT NEW DATABASE: Ein Problem trat auf -> Rollback")
         connection.rollback()
 
 
@@ -110,13 +116,11 @@ def newDatabase(item):
 def read_consum_Admin():
     cur.execute("SELECT item, NumbOfConsum, datum, tag FROM consum ORDER BY item ASC ")
     data = cur.fetchall()
-    #print("Read Consum Admin",data)
     return data
 
 def read_consum():
     cur.execute("SELECT item, MAX(NumbOfConsum), tag  FROM consum GROUP BY item ORDER BY item ASC")
     data = cur.fetchall()
-    #print("Read Consum", data)
     return data
 
 def read_consum_of_item(item):
@@ -124,18 +128,10 @@ def read_consum_of_item(item):
     tag = time.strftime("%Y-%m-%d", now)
     cur.execute("SELECT NumbOfConsum FROM consum WHERE item=:item AND tag=:tag", {"item" : item, "tag" : tag})
     data = cur.fetchone()
-    #print("read_consum_of_item:", data, type(data))
     if data is None:
-        #print("Cool")
         return 0
     else:
-        #print("notcool")
         return data[0]
-    #print("Read Consum of item", data)
-
-
-
-#♠read_consum()
 
 def Consum_total():
     try:
@@ -159,33 +155,31 @@ def read_items():
 
 def delete(tag, item):
     try:
-        print("Try delete: ", tag)
         cur.execute("DELETE FROM consum WHERE tag=:tag AND item=:item", {"tag": tag, "item" : item})
         connection.commit()
         data = cur.fetchone()
-        print(data)
-        print("DELETE: Succesfully: ", tag, item)
+        consumlogger.info("DELETE DATABASE: " + item + " Succesfully")
         return data[0]
     except:
         connection.rollback()
+        consumlogger.error("DELETE DATABASE: Ein Problem trat auf -> Rollback")
         return 0
+
 
 def delete_admin(item):
     try:
-        print("Try delete: ", item)
         cur.execute("DELETE FROM consum WHERE item=:item", {"item" : item})
         connection.commit()
         data = cur.fetchone()
-        print("DELETE ADMIN: Succesfully")
+        consumlogger.info("DELETE FULL DATABASE: " + item + " Succesfully")
     except:
-        print("DELETE ADMIN: failed")
         connection.rollback()
+        consumlogger.error("DELETE FULL DATABASE: Ein Problem trat auf -> Rollback")
         return 0
 
 
 
 def init_GUI():
-    print("Init GUI")
     now = time.localtime(time.time())                                       #convert UNIX time in struct_time
     tag = time.strftime("%Y-%m-%d", now)
     try:
@@ -199,7 +193,7 @@ def init_GUI():
             #print("Data avaivle", data[0])
             return data[0]
     except:
-        print("Init GUI fail")
+        consumlogger.error("INIT GUI: FAIL (Database not Load) ")
         return 0
 
 

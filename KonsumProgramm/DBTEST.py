@@ -1,10 +1,12 @@
 import sqlite3
 import datetime
+import logging
+import sys
 
 #con = sqlite3.connect(":memory:", detect_types=sqlite3.PARSE_DECLTYPES|sqlite3.PARSE_COLNAMES)
 con = sqlite3.connect("scheiss.db")
 cur = con.cursor()
-cur.execute("create table test(d date, ts timestamp)")
+#cur.execute("create if not exist table test(d date, ts timestamp)")
 
 today = datetime.date.today()
 now = datetime.datetime.now()
@@ -21,3 +23,16 @@ print("current_date", row[0], type(row[0]))
 print("current_timestamp", row[1], type(row[1]))
 
 con.close()
+
+
+
+handler = logging.StreamHandler(sys.stdout)
+frm = logging.Formatter("{asctime} {levelname}: {message}",
+"%d.%m.%Y %H:%M:%S", style="{")
+handler.setFormatter(frm)
+logger = logging.getLogger()
+logger.addHandler(handler)
+logger.setLevel(logging.DEBUG)
+logger.critical("Ein wirklich kritischer Fehler")
+logger.warning("Und eine Warnung hinterher")
+logger.info("Dies hingegen ist nur eine Info")
