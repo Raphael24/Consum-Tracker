@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 """
-Dies ist ein Docstring von Consumtracker
+Have some Fun with this Programm to track your Daily routines
 """
 
 import sys
