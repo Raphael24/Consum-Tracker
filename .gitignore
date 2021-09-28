@@ -4,3 +4,7 @@ GUITESTProgramm.py
 timetest.py
 Anforderungen.docx
 build
+dist
+
+KonsumProgramm/KonsumProgramm
+KonsumProgramm/__pycache__

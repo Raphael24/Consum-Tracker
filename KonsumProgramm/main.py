@@ -1,6 +1,7 @@
 #!/usr/bin/python
 """
-Dies ist ein Docstring von Consumtracker
+main.py
+Main Logik für den Konsum Tracker
 """
 
 import sys
@@ -8,23 +9,22 @@ from PyQt5 import QtWidgets, uic
 from PyQt5.QtCore import QDate
 import dbConsum as db
 import time
-import logging
-import log as log
+import log
+import os
 
-consumlogger = logging.getLogger("ConsumLogger")
-consumlogger.setLevel(logging.INFO)
 
-fh = logging.FileHandler('KonsumProgramm\Main.log')
-fh.setLevel(logging.INFO)
-frm = logging.Formatter("{asctime} {levelname:8} {message}", "%Y.%m.%d %H:%M:%S", style="{")
-fh.setFormatter(frm)
-consumlogger.addHandler(fh)
+#init getLogger
+
+consumlogger = log.logger("ConsumLogger", "Main.log")
+consumlogger.info("INIT LOGGER MAIN: done")
 
 
 class ConsumUI(QtWidgets.QDialog):  #class ConsumUI
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.ui = uic.loadUi('KonsumProgramm/consum.ui', self)
+        consumlogger.info("MAIN Just for fun")
+        self.ui = uic.loadUi('consum.ui', self)
+        consumlogger.info("consum.ui load succesfully")
         self.setWindowTitle("Cunsum Tracker")
         self.i_consum = db.init_GUI()
         self.str_currentDatabase = 'Huere Michi'
@@ -79,7 +79,7 @@ class ConsumUI(QtWidgets.QDialog):  #class ConsumUI
         self.TW_DatenbankAdmin.setHorizontalHeaderLabels(Headers)
         self.LoadDataAdmin()
 
-        consumlogger.log(logging.INFO, "INIT: done")
+        consumlogger.info("INIT: done")
 
     def fake(self):
         pass
@@ -97,7 +97,7 @@ class ConsumUI(QtWidgets.QDialog):  #class ConsumUI
             self.ui.CB_DeleteData.addItem(n[0])
             self.ui.CB_Database.addItem(n[0])
             self.ui.CB_DeleteFullData.addItem(n[0])
-        consumlogger.log(logging.INFO, "INIT COMBOBOX: done")
+        consumlogger.info("INIT COMBOBOX: done")
 
     def changeDatabase(self):
         item = self.ui.CB_Database.currentText()
@@ -108,7 +108,7 @@ class ConsumUI(QtWidgets.QDialog):  #class ConsumUI
         self.L_ConsumTotal.setText(str(NumbOfConsum))
         self.i_consum = NumbOfConsum
         self.ui.L_title.setText("Consum Tracker - " + item)
-        consumlogger.log(logging.INFO, "Database change: " + item)
+        consumlogger.info("Database change: " + item)
 
 
     #---- Consum ---------------------------------------------------------------
@@ -123,7 +123,7 @@ class ConsumUI(QtWidgets.QDialog):  #class ConsumUI
         print(self.str_currentDatabase)
         db.insert_Consum(self.i_consum, self.str_currentDatabase)
 
-        consumlogger.log(logging.INFO, "Consumcounter: " + str(self.i_consum))
+        consumlogger.info("Consumcounter: " + str(self.i_consum))
         #time.sleep(5)
 
 
@@ -145,7 +145,7 @@ class ConsumUI(QtWidgets.QDialog):  #class ConsumUI
             for m in range(0,3):                                                # write the items in the table Widget
                 Qitem = QtWidgets.QTableWidgetItem(items[m])
                 self.TW_Datenbank.setItem(y, m, Qitem)
-        consumlogger.log(logging.INFO, "Load data User: Succesfully")
+        consumlogger.info("Load data User: Succesfully")
 
 
     def LoadDataAdmin(self):
@@ -165,7 +165,7 @@ class ConsumUI(QtWidgets.QDialog):  #class ConsumUI
             for m in range(0,4):                                                # write the items in the table Widget
                 Qitem = QtWidgets.QTableWidgetItem(items[m])
                 self.TW_DatenbankAdmin.setItem(y, m, Qitem)
-        consumlogger.log(logging.INFO, "Load data Admin: Succesfully")
+        consumlogger.info("Load data Admin: Succesfully")
 
 
     #---- Write Data -----------------------------------------------------------
@@ -174,7 +174,7 @@ class ConsumUI(QtWidgets.QDialog):  #class ConsumUI
         name = self.ui.LE_NameDatabase.text()
         db.newDatabase(name)
         self.init_ComboBox_Database()
-        consumlogger.log(logging.INFO, "Create Database: " + name )
+        consumlogger.info("Create Database: " + name )
 
     #---- Delete Data ----------------------------------------------------------
 
@@ -182,20 +182,20 @@ class ConsumUI(QtWidgets.QDialog):  #class ConsumUI
         tag = self.ui.I_DeleteDate.date().toPyDate()
         item = self.ui.CB_DeleteData.currentText()
         if item == "":
-            consumlogger.log(logging.INFO, "Deleting of failed")
+            consumlogger.info("Deleting of failed")
         else:
             db.delete(tag, item)
-            consumlogger.log(logging.INFO, "Deleting of " + item + ": Succesfully")
+            consumlogger.info("Deleting of " + item + ": Succesfully")
             self.init_ComboBox_Database()
             self.LoadDataAdmin()
 
     def deletFullData(self):
         item = self.ui.CB_DeleteFullData.currentText()
         if item == "":
-            consumlogger.log(logging.INFO, "Deleting full data of failed")
+            consumlogger.info("Deleting full data of failed")
         else:
             db.delete_admin(item)
-            consumlogger.log(logging.INFO, "Deleting full data of " + item + ": Succesfully")
+            consumlogger.info("Deleting full data of " + item + ": Succesfully")
             self.init_ComboBox_Database()
             self.LoadDataAdmin()
 
@@ -217,25 +217,18 @@ class ConsumUI(QtWidgets.QDialog):  #class ConsumUI
     #---- Tests ----------------------------------------------------------------
 
     def Test1(self):
-        consumlogger.log(logging.INFO, "----- RUN TEST -----")
+        consumlogger.info("----- RUN TEST -----")
         self.Consum()
         self.ui.LE_NameDatabase.setText("Testdatabase1")
-        print("Run Test OK 1")
         self.createDatabase()
-        print("Run Test OK 2")
         self.ui.CB_Database.setCurrentText("Testdatabase1")
-        print("Run Test OK 3")
         self.changeDatabase()
-        print("Run Test OK 4")
         self.Consum()
         self.Consum()
         self.Consum()
-        print("Run Test OK 5")
         self.ui.CB_DeleteFullData.setCurrentText("Testdatabase1")
-        print("Run Test OK 6")
         self.deletFullData()
-        print("Run Test OK 7")
-        consumlogger.log(logging.INFO, "----- END TEST -----")
+        consumlogger.info("----- END TEST -----")
 
     def Exit(self):
         self.close()
@@ -251,4 +244,4 @@ if __name__ == '__main__':
         sys.exit(app.exec())
         print("start")
     except:
-        consumlogger.log(logging.CRITICAL, "+-+-+-+-+-+-+-+-+-+-+-+ GUI not start +-+-+-+-+-+-+-+-+-+-+-+")
+        consumlogger.critical("+-+-+-+-+-+-+-+-+-+-+-+ GUI not start +-+-+-+-+-+-+-+-+-+-+-+")

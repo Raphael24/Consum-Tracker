@@ -2,23 +2,18 @@ import sqlite3
 import datetime
 import time
 import random
-import logging
+import log
 
 #configuration Logging
-consumlogger = logging.getLogger("ConsumLoggerDB")
-consumlogger.setLevel(logging.INFO)
+consumlogger = log.logger("ConsumLoggerDB", "Database.log")
+consumlogger.info("INIT LOGGER DB: done")
 
-fh = logging.FileHandler('KonsumProgramm\Database.log')
-fh.setLevel(logging.INFO)
-frm = logging.Formatter("{asctime} {levelname:8} {message}", "%Y.%m.%d %H:%M:%S", style="{")
-fh.setFormatter(frm)
-
-consumlogger.addHandler(fh)
 consumlogger.info('-------------------- Start Database programm --------------------')
 
-
 #Database connection
-connection = sqlite3.connect("KonsumProgramm\consum.db")
+consumlogger.info('-------------------- Just for Fun --------------------')
+connection = sqlite3.connect("consum.db")
+consumlogger.info('--------------------DB load succesfully --------------------')
 cur = connection.cursor()
 
 #Database Structure
