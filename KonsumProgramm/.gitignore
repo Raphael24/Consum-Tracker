@@ -1,0 +1,7 @@
+*.log
+DBTEST.py
+GUITESTProgramm.py
+timetest.py
+KonsumProgramm
+__pycache__
+setupinfo.py

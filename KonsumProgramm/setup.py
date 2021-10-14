@@ -1,32 +1,44 @@
-
 # Usage of this setup Script to generate an exe
 #
 # 0. Install the normal Python interpretor!
+# 0.1 Install cx_Freeze by running this command: "pip install --upgrade cx_Freeze"
 # 1. Install py3exe vom the folder ..\py3exe\
 # 2. Open new Console
 # 3. Navigate to this Folder, where this file is stored
-# 4. Enter command "python setup.py py2exe"
-# 5. OR: Oben file ant_build.xml and make target!
+# 4. Enter command "python setup.py build"
 #
 # Author: Raphael Romann
 # 24.09.2021
+#
+#
+# ------ Verison directory -----
+#
+# Version 0.1 , 24.09.2021 : Init setup
+#
+# Version 0.2, 14.10.2021 : Improve Loaddata function, Add consum per month
+#
 
 
-from distutils.core import setup
-import py2exe
+#from setuptools import setup
+
+from cx_Freeze import setup, Executable
+import sys
+
+base = None
+if sys.platform == "win32":
+    base = "Win32GUI"
+
+build_exe_options = {"build_exe":"../dist",
+                     "include_files":["KonsumProgramm/consum.ui",
+                                      "Icon_Main.jpg"],
+		             "excludes":["tkinter"],
+                    }
 
 
-setup(
-      console=['main.py'],                                                      # Main python script file defined as console application
-      name='Consum Tracker',                                                    # Name of the application
-      version='1.0',                                                            # Main Version
-      description='Simulator for FLG Communication',                            # Description
-      author='Raphael Romann',                                                  # Autor
-      author_email='admin@example.com',                                         # E-Mail
-      packages=['src'],                                                         # onwn used package
 
-      data_files=[('xml', ['xml/receive.xml', 'xml/simconfig.xml']),            # include example file to the distibution
-                  ('script', ['script/down.fss', 'script/start.fss', 'script/Komp1_6.fss']),
-                  ]
-
-)
+setup(  name = "consumtracker",
+        version = "0.2",
+        author='Raphael Romann',
+        description = "A Tracker for your daily consums for different things",
+        options = {"build_exe": build_exe_options},
+        executables = [Executable("main.py", base=base)])

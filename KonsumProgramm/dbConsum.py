@@ -2,20 +2,30 @@ import sqlite3
 import datetime
 import time
 import random
-import logging
+import log
 
-#configuration Logging
-logging.basicConfig(filename = "DBconsum.log",
-                    level = logging.INFO,
-                    style = "{",
-                    format = "{asctime} {levelname:8} {message}",
-                    datefmt = "%Y-%m-%d %H:%M:%S")
+# ----------configuration Logging ----------
 
-#Database connection
-connection = sqlite3.connect("D:\Projekt1\KonsumProgramm\consum.db")
+consumlogger = log.logger("ConsumLoggerDB", "Database.log")
+consumlogger.info("INIT LOGGER DB: done")
+consumlogger.info('-------------------- Start Database programm --------------------')
+
+# ----------Database connection ----------
+
+consumlogger.info('-------------------- Just for Fun --------------------')
+connection = sqlite3.connect("consum.db")
+consumlogger.info('--------------------DB load succesfully --------------------')
 cur = connection.cursor()
 
-#Database Structure
+#---------- Globale variablen ----------
+
+akt_zeit = time.localtime(time.time())      #convert UNIX time in struct_time
+akt_monat = time.strftime("%m", akt_zeit)
+akt_tag = time.strftime("%Y-%m-%d", akt_zeit)
+akt_zeit_form = time.strftime("%Y-%m-%d %H:%M:%S", akt_zeit)
+
+# ----------Database Structure ----------
+
 cur.execute("""CREATE TABLE IF NOT EXISTS consum (
                     item TEXT,
                     NumbOfConsum INTEGER,
@@ -33,177 +43,200 @@ cur.execute("""CREATE TABLE IF NOT EXISTS consumperday (
 
 def insert_Consum(NumbOfConsum, item="Huere Michi"):
     try:
-        now = time.localtime(time.time())                                       #convert UNIX time in struct_time
-        tag = time.strftime("%Y-%m-%d", now)
-        now = time.strftime("%Y-%m-%d %H:%M:%S", now)
-        #tag = '2021-09-16'
-        #print("Time OK: ", now, tag)
-        cur.execute("SELECT tag FROM consum WHERE tag=:tag AND item=:item", {"tag" : tag, "item" : item})
+        cur.execute("SELECT tag FROM consum WHERE tag=:tag AND item=:item", {"tag" : akt_tag, "item" : item})
         data = cur.fetchone()
-        #print("Zeit:", data, type(data))
+
         if data is None:
-            print("Es wurde kein Passender Datensatz gefunden:", item, NumbOfConsum, now, tag)
-            cur.execute("INSERT INTO consum(item, NumbOfConsum, datum, tag) VALUES (?, ?, ?, ?)", (item, NumbOfConsum, now, tag))
+            #print("Es wurde kein Passender Datensatz gefunden:", item, NumbOfConsum, now, tag)
+            cur.execute("INSERT INTO consum(item, NumbOfConsum, datum, tag) VALUES (?, ?, ?, ?)", (item, NumbOfConsum, akt_zeit_form, akt_tag))
             #print("commit")
             connection.commit()
-            print("Succesfully INSERT: ", NumbOfConsum, item)
-            logging.log(logging.INFO, "Datensatz wurde erfolgreich erstellt")
+            consumlogger.info("Datensatz: " + item + " wurde erfolgreich erstellt")
+            #print("Succesfully INSERT: ", NumbOfConsum, item)
         else:
             print("Es wurde ein Passender Datensatz gefunden")
             #print("Datenüberprüfen:", NumbOfConsum, type(NumbOfConsum), tag,type(tag), item,type(item))
-            cur.execute("UPDATE consum SET NumbOfConsum=:value1 WHERE tag=:tag AND item=:item", {"value1" : NumbOfConsum, "tag" : tag, "item" : item})
-            print("Succesfully UPDATE: ", NumbOfConsum, item)
+            cur.execute("UPDATE consum SET NumbOfConsum=:value1 WHERE tag=:tag AND item=:item", {"value1" : NumbOfConsum, "tag" : akt_tag, "item" : item})
             connection.commit()
-            logging.log(logging.INFO, "Datensatz wurde erfolgreich Aktualisiert")
+            print("Succesfully UPDATE: ", NumbOfConsum, item)
+            consumlogger.info("Datensatz: " + item + " wurde erfolgreich Aktualisiert: " + str(NumbOfConsum))
 
     except:
-        print("INSERT_COMSUM: Ein Problem trat auf -> Rollback")
-        logging.log(logging.ERROR, "INSERT_COMSUM: Ein Problem trat auf -> Rollback")
+        #print("INSERT_COMSUM: Ein Problem trat auf -> Rollback")
         connection.rollback()
+        consumlogger.Error("INSERT_COMSUM: Ein Problem trat(" + item + ") auf -> Rollback")
 
 
 def insert(): #only for Admins
+    print('DB ok insert')
     try:
-        now = time.localtime(time.time())                                       #convert UNIX time in struct_time
-        now = time.strftime("%Y-%m-%d %H:%M:%S", now)
-        tag = time.strftime("%Y-%m-%d", now)
-        tag = '2021-09-10'
-        #print("INSERT:",now)
+        print('DB try OK')
         item = "Huere Michi"
+        print('Check 4')
         for i in range(1,2):
             NumbOfConsum = (random.randint(1,10))
-            print("Es wird ein neuer Datensatz erstellt")
-            cur.execute("INSERT INTO consum(item, NumbOfConsum, datum, tag) VALUES (?, ?, ?, ?)", (item, NumbOfConsum, now, tag))
-            print("commit")
+            cur.execute("INSERT INTO consum(item, NumbOfConsum, datum, tag) VALUES (?, ?, ?, ?)", (item, NumbOfConsum, akt_zeit_form, akt_tag))
             connection.commit()
-            print("Succesfully Insert TEST: ", NumbOfConsum)
-            logging.log(logging.DEBUG, "Datensatz wurde erfolgreich erstellt TEST")
+            #print("Succesfully Insert TEST: ", NumbOfConsum)
+            consumlogger.info("TEST INSERT: Datensatz wurde erfolgreich erstellt.")
     except:
-        logging.log(logging.DEBUG, "INSERT: Ein Problem trat auf -> Rollback")
-        print("INSERT: Ein Problem trat auf -> Rollback")
+        #print("INSERT: Ein Problem trat auf -> Rollback")
         connection.rollback()
+        consumlogger.info("TEST INSERT: Ein Problem trat auf -> Rollback")
+
 
 def newDatabase(item):
     try:
-        now = time.localtime(time.time())                                       #convert UNIX time in struct_time
-        tag = time.strftime("%Y-%m-%d", now)
-        now = time.strftime("%Y-%m-%d %H:%M:%S", now)
         cur.execute("SELECT item FROM consum WHERE item=:item", {"item" : item})
         #print("Zeit:", data[0], type(data[0]))
         data = cur.fetchone()
 
         if data is None:
-            print("Es wird ein neuer Eintrag erstellt")
-            cur.execute("INSERT INTO consum(item, NumbOfConsum, datum, tag) values(?, ?, ?, ?)", (item, 0, now, tag))
+            #print("Es wird ein neuer Eintrag erstellt")
+            cur.execute("INSERT INTO consum(item, NumbOfConsum, datum, tag) values(?, ?, ?, ?)", (item, 0, akt_zeit_form, akt_tag))
             connection.commit()
-            print("Succesfully Insert Database: ", item)
+            #print("Succesfully Insert Database: ", item)
+            consumlogger.info("INSERT NEW DATABASE: " + item)
         else:
-            print("Datensatz bereits Vorhanden")
+            #print("Datensatz bereits Vorhanden")
+            consumlogger.info("INSERT NEW DATABASE: " + item + " ist bereits vorhanden")
     except:
-        logging.log(logging.DEBUG, "INSERT: Ein Problem trat auf -> Rollback")
-        print("INSERT NEW DATABASE: Ein Problem trat auf -> Rollback")
+        consumlogger.error("INSERT NEW DATABASE: Ein Problem trat auf -> Rollback")
+        #print("INSERT NEW DATABASE: Ein Problem trat auf -> Rollback")
         connection.rollback()
 
 
 #-----------------------All Actions from reading the Database-------------------
 
+def read_items():
+    cur.execute("SELECT item FROM consum GROUP BY item")
+    data = cur.fetchall()
+    return data
+
+
 def read_consum_Admin():
     cur.execute("SELECT item, NumbOfConsum, datum, tag FROM consum ORDER BY item ASC ")
     data = cur.fetchall()
-    #print("Read Consum Admin",data)
     return data
+
 
 def read_consum():
-    cur.execute("SELECT item, MAX(NumbOfConsum), tag  FROM consum GROUP BY item ORDER BY item ASC")
+    consums = []
+    cur.execute("SELECT COUNT(item) FROM consum")
+    data = cur.fetchone()
+    max = data[0]
+    items = read_items()
+    item = items[0] #eine liste in der Jede Kategorie nur einmal for kommt
+    len_items = len(items)
+
+    for i in range(0, len_items):
+        item = items[i]
+        item = item[0]
+        cur.execute("SELECT item, MAX(NumbOfConsum), tag FROM consum WHERE item=:item GROUP BY tag", {"item" : item})
+        data = cur.fetchall()
+        #print("DATA", data)
+        consums.append(data)
+
+    return consums
+
+
+def read_test():
+    cur.execute("SELECT item FROM consum GROUP BY item ORDER BY item ASC")
     data = cur.fetchall()
-    #print("Read Consum", data)
+    print(data)
     return data
+
 
 def read_consum_of_item(item):
-    now = time.localtime(time.time())                                       #convert UNIX time in struct_time
-    tag = time.strftime("%Y-%m-%d", now)
-    cur.execute("SELECT NumbOfConsum FROM consum WHERE item=:item AND tag=:tag", {"item" : item, "tag" : tag})
+    cur.execute("SELECT NumbOfConsum FROM consum WHERE item=:item AND tag=:tag", {"item" : item, "tag" : akt_tag})
     data = cur.fetchone()
-    #print("read_consum_of_item:", data, type(data))
+
     if data is None:
-        #print("Cool")
         return 0
     else:
-        #print("notcool")
         return data[0]
-    #print("Read Consum of item", data)
 
+def read_total_consum_of_item(item):
+    cur.execute("SELECT SUM(NumbOfConsum) FROM consum WHERE item=:item", {"item" : item})
+    data = cur.fetchone()
 
-
-#♠read_consum()
-
-def Consum_total():
-    try:
-        cur.execute("SELECT MAX(NumbOfConsum) FROM consum")
-        data = cur.fetchone()
-        return data[0]
-    except:
+    if data is None:
         return 0
+    else:
+        return data[0]
 
+def read_consum_per_month(item):
+    cur.execute("SELECT SUM(NumbOfConsum) FROM consum WHERE strftime('%m', tag) =:month AND item=:item", {"item" : item, "month" : akt_monat})
+    data = cur.fetchone()
 
-def Comsum_Month():
-    # TODO:
-    pass
+    if data is None:
+        return 0
+    else:
+        return data[0]
 
-def read_items():
-    cur.execute("SELECT item from consum GROUP BY item")
-    data = cur.fetchall()
-    return data
+#comsum_Month('Kaffi')
 
 #-----------------------All Actions from deleting the Database------------------
 
 def delete(tag, item):
     try:
-        print("Try delete: ", tag)
         cur.execute("DELETE FROM consum WHERE tag=:tag AND item=:item", {"tag": tag, "item" : item})
         connection.commit()
         data = cur.fetchone()
-        print(data)
-        print("DELETE: Succesfully: ", tag, item)
+        consumlogger.info("DELETE DATABASE: " + item + " Succesfully")
         return data[0]
     except:
         connection.rollback()
+        consumlogger.error("DELETE DATABASE: Ein Problem trat auf -> Rollback")
         return 0
+
 
 def delete_admin(item):
     try:
-        print("Try delete: ", item)
         cur.execute("DELETE FROM consum WHERE item=:item", {"item" : item})
         connection.commit()
         data = cur.fetchone()
-        print("DELETE ADMIN: Succesfully")
+        consumlogger.info("DELETE FULL DATABASE: " + item + " Succesfully")
     except:
-        print("DELETE ADMIN: failed")
         connection.rollback()
+        consumlogger.error("DELETE FULL DATABASE: Ein Problem trat auf -> Rollback")
         return 0
-
 
 
 def init_GUI():
-    print("Init GUI")
-    now = time.localtime(time.time())                                       #convert UNIX time in struct_time
-    tag = time.strftime("%Y-%m-%d", now)
+    initlist = []
     try:
-        cur.execute("SELECT MAX(NumbOfConsum) FROM consum WHERE tag=:tag", {"tag": tag })
+        cur.execute("SELECT MAX(NumbOfConsum) FROM consum WHERE tag=:tag ", {"tag": akt_tag })
         data = cur.fetchone()
 
+        cur.execute("SELECT item FROM consum ")
+        item = cur.fetchone()
+
+        initlist.append(data[0])
+        initlist.append(item)
+
+        if item is None:
+            print('Type = None')
+            initlist[1] = 0
+
+        if isinstance(item, tuple):
+            print('Type = tupel')
+            if item[0] == '':
+                print('Tupel: no data')
+                initlist[1] = 0
+            else:
+                initlist[1] = item[0]
+
+
         if data[0] == None:
-            #print("No data avaible:")
-            return 0
+            initlist[0] = 0
+
         else:
-            #print("Data avaivle", data[0])
-            return data[0]
+            return initlist
+
     except:
-        print("Init GUI fail")
+        consumlogger.error("INIT GUI: FAIL (Database not Load) ")
         return 0
-
-
-
 
 
 #init_GUI()
