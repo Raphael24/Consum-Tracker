@@ -122,21 +122,16 @@ def read_consum_Admin():
 
 def read_consum():
     consums = []
-    cur.execute("SELECT COUNT(item) FROM consum")
-    data = cur.fetchone()
-    max = data[0]
     items = read_items()
-    item = items[0] #eine liste in der Jede Kategorie nur einmal for kommt
     len_items = len(items)
+    item = items[0]                                                             #eine liste in der jede Kategorie genau einmal enthält
 
-    for i in range(0, len_items):
+    for i in range(0, len_items):                                               #durchläuft die verschiedenen Kategorien und sucht den maximalwert der Spalte "NumbOfConsum"
         item = items[i]
         item = item[0]
         cur.execute("SELECT item, MAX(NumbOfConsum), tag FROM consum WHERE item=:item GROUP BY tag", {"item" : item})
         data = cur.fetchall()
-        #print("DATA", data)
         consums.append(data)
-
     return consums
 
 
@@ -168,12 +163,11 @@ def read_total_consum_of_item(item):
 def read_consum_per_month(item):
     cur.execute("SELECT SUM(NumbOfConsum) FROM consum WHERE strftime('%m', tag) =:month AND item=:item", {"item" : item, "month" : akt_monat})
     data = cur.fetchone()
+    print(data)
+    return data[0]
 
-    if data is None:
-        return 0
-    else:
-        return data[0]
-
+#a = read_consum_per_month('furz')
+#print(a)
 #comsum_Month('Kaffi')
 
 #-----------------------All Actions from deleting the Database------------------
@@ -226,7 +220,6 @@ def init_GUI():
                 initlist[1] = 0
             else:
                 initlist[1] = item[0]
-
 
         if data[0] == None:
             initlist[0] = 0

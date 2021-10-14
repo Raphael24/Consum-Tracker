@@ -109,16 +109,15 @@ class ConsumUI(QtWidgets.QDialog):  #class ConsumUI
         item = self.ui.CB_Database.currentText()
         self.str_currentDatabase = item
 
-        NumbOfConsum = db.read_consum_of_item(item)
-        TotalConsum = db.read_total_consum_of_item(item)
-        TotalConsum_month = db.read_consum_per_month(item)
+        self.i_consum = db.read_consum_of_item(item)
+        self.i_consum_total = db.read_total_consum_of_item(item)
+        self.i_consum_month = db.read_consum_per_month(item)
 
-        self.L_NumbOfConsum.setText(str(NumbOfConsum))
-        self.L_ConsumToday.setText(str(NumbOfConsum))
-        self.L_ConsumTotal.setText(str(TotalConsum))
-        self.i_consum = NumbOfConsum
-        self.i_consum_total = TotalConsum
-        self.i_consum_month = TotalConsum_month
+        self.L_NumbOfConsum.setText(str(self.i_consum))
+        self.L_ConsumToday.setText(str(self.i_consum))
+        self.L_ConsumTotal.setText(str(self.i_consum_total))
+        self.L_ConsumMonth.setText(str(self.i_consum_month))
+
         self.ui.L_title.setText("Consum Tracker - " + item)
         consumlogger.info("Database change: " + item)
 
@@ -128,10 +127,18 @@ class ConsumUI(QtWidgets.QDialog):  #class ConsumUI
 
     def Consum(self): # Consum on the Homepage +1
         self.i_consum += 1
+        db.insert_Consum(self.i_consum, self.str_currentDatabase)
+
+        self.i_consum_total = db.read_total_consum_of_item(self.str_currentDatabase)
+        self.i_consum_month = db.read_consum_per_month(self.str_currentDatabase)
+
         self.L_NumbOfConsum.setText(str(self.i_consum))
         self.L_ConsumToday.setText(str(self.i_consum))
+        self.L_ConsumMonth.setText(str(self.i_consum_month))
+        self.L_ConsumTotal.setText(str(self.i_consum_total))
+        self.loadData()
+        self.LoadDataAdmin()
         print(self.str_currentDatabase)
-        db.insert_Consum(self.i_consum, self.str_currentDatabase)
         consumlogger.info("Consumcounter: " + str(self.i_consum))
 
 
