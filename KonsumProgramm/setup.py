@@ -15,7 +15,7 @@
 #
 # Version 0.1 , 24.09.2021 : Init setup
 #
-# Version 0.2, 14.10.2021 : Improve Loaddata function
+# Version 0.2, 14.10.2021 : Improve Loaddata function, Add consum per month
 #
 
 

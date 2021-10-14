@@ -57,7 +57,10 @@ gridline-color: rgb(85, 170, 255);
 </string>
      </property>
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
+     </property>
+     <property name="movable">
+      <bool>true</bool>
      </property>
      <widget class="QWidget" name="Home">
       <attribute name="title">
@@ -430,6 +433,22 @@ border-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:0, stop:0 rgba(0,
        </property>
        <property name="text">
         <string>Erstellen</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="L_InputDataFail">
+       <property name="geometry">
+        <rect>
+         <x>110</x>
+         <y>40</y>
+         <width>281</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:0, stop:0 rgba(0, 0, 0, 0), stop:1 rgba(255, 255, 255, 255));</string>
+       </property>
+       <property name="text">
+        <string/>
        </property>
       </widget>
      </widget>
