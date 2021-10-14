@@ -57,7 +57,7 @@ gridline-color: rgb(85, 170, 255);
 </string>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="Home">
       <attribute name="title">

@@ -108,15 +108,44 @@ def newDatabase(item):
 
 #-----------------------All Actions from reading the Database-------------------
 
+def read_items():
+    cur.execute("SELECT item FROM consum GROUP BY item")
+    data = cur.fetchall()
+    return data
+
+
 def read_consum_Admin():
     cur.execute("SELECT item, NumbOfConsum, datum, tag FROM consum ORDER BY item ASC ")
     data = cur.fetchall()
     return data
 
+
 def read_consum():
-    cur.execute("SELECT item, MAX(NumbOfConsum), tag  FROM consum GROUP BY item ORDER BY item ASC")
+    consums = []
+    cur.execute("SELECT COUNT(item) FROM consum")
+    data = cur.fetchone()
+    max = data[0]
+    items = read_items()
+    item = items[0] #eine liste in der Jede Kategorie nur einmal for kommt
+    len_items = len(items)
+
+    for i in range(0, len_items):
+        item = items[i]
+        item = item[0]
+        cur.execute("SELECT item, MAX(NumbOfConsum), tag FROM consum WHERE item=:item GROUP BY tag", {"item" : item})
+        data = cur.fetchall()
+        #print("DATA", data)
+        consums.append(data)
+
+    return consums
+
+
+def read_test():
+    cur.execute("SELECT item FROM consum GROUP BY item ORDER BY item ASC")
     data = cur.fetchall()
+    print(data)
     return data
+
 
 def read_consum_of_item(item):
     now = time.localtime(time.time())                                       #convert UNIX time in struct_time
@@ -141,10 +170,6 @@ def Comsum_Month():
     # TODO:
     pass
 
-def read_items():
-    cur.execute("SELECT item from consum GROUP BY item")
-    data = cur.fetchall()
-    return data
 
 #-----------------------All Actions from deleting the Database------------------
 

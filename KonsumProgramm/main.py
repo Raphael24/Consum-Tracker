@@ -27,7 +27,7 @@ class ConsumUI(QtWidgets.QDialog):  #class ConsumUI
         consumlogger.info("consum.ui load succesfully")
         self.setWindowTitle("Cunsum Tracker")
         self.i_consum = db.init_GUI()
-        self.str_currentDatabase = 'Huere Michi'
+        self.str_currentDatabase = ''
 
         #Init Labels
         self.L_NumbOfConsum.setText(str(self.i_consum))
@@ -130,22 +130,36 @@ class ConsumUI(QtWidgets.QDialog):  #class ConsumUI
     #---- Read Data ------------------------------------------------------------
 
 
-    def loadData(self):                                                         #load data for the Homepage
+    def loadData(self):
+        #print('load data')                                                         #load data for the Homepage
         data = db.read_consum()
-        self.TW_Datenbank.setRowCount(len(data))                                #calculate the number of rows
-        for n in range(0, len(data)):                                           #Fill the data in the Table widget
-            y = n
-            items = data[n]                                                     #read a single item from List [(...),(...),(...)]
-            item = items[0]                                                     #read the item on position number 0 (x, y, z)
-            numb = str(items[1])                                                #read the item on position number 1 (x, y, z)g
-            tag = items[2]
-            #print("Item: ",item, "Number:",numb,"Tag: ",tag)                   #log Message
-            #print("TAG", items[2], type(items[2]))
-            items = [item, tag, numb]                                            #a list of all items from one queue
+        AllItems = []
+
+        for kategorie in data:
+            for values in kategorie:                                                #read a single item from List [(...),(...),(...)]
+                item = values[0]                                                     #read the item on position number 0 (x, y, z)
+                numb = str(values[1])                                                #read the item on position number 1 (x, y, z)g
+                tag = values[2]
+                #print("Item: ", item, "Number:", numb,"Tag: ",tag, "Y:", y )
+                #print("TAG", items[2], type(items[2]))
+                items = [item, tag, numb]
+                AllItems.append(items)
+
+        #print("AllItems", AllItems)
+        self.TW_Datenbank.setRowCount(len(AllItems))
+
+        for i in enumerate(AllItems):#a list of all items from one queue
+            #print(i)
+            y = i[0]
+            #print("Y: ", y)
+            items = i[1]
+            #print("ITEMS: ", items)
             for m in range(0,3):                                                # write the items in the table Widget
                 Qitem = QtWidgets.QTableWidgetItem(items[m])
-                self.TW_Datenbank.setItem(y, m, Qitem)
+                self.TW_Datenbank.setItem(y, m, Qitem) #Fill the data in the Table widget
+
         consumlogger.info("Load data User: Succesfully")
+
 
 
     def LoadDataAdmin(self):
@@ -199,7 +213,7 @@ class ConsumUI(QtWidgets.QDialog):  #class ConsumUI
             self.init_ComboBox_Database()
             self.LoadDataAdmin()
 
-    #---- Log ----------------------------------------------------------------
+    #---- Log ------------------------------------------------------------------
 
     def show_log(self, i):
         self.ui.LW_ListLog.clear()
@@ -244,4 +258,4 @@ if __name__ == '__main__':
         sys.exit(app.exec())
         print("start")
     except:
-        consumlogger.critical("+-+-+-+-+-+-+-+-+-+-+-+ GUI not start +-+-+-+-+-+-+-+-+-+-+-+")
+        consumlogger.critical("+-+-+-+-+-+-+-+-+-+-+-+ GUI Closed +-+-+-+-+-+-+-+-+-+-+-+")

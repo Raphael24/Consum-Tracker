@@ -9,8 +9,17 @@
 #
 # Author: Raphael Romann
 # 24.09.2021
-#from setuptools import setup
+#
+#
+# ------ Verison directory -----
+#
+# Version 0.1 , 24.09.2021 : Init setup
+#
+# Version 0.2, 14.10.2021 : Improve Loaddata function
+#
 
+
+#from setuptools import setup
 
 from cx_Freeze import setup, Executable
 import sys
@@ -28,7 +37,7 @@ build_exe_options = {"build_exe":"../dist",
 
 
 setup(  name = "consumtracker",
-        version = "0.1",
+        version = "0.2",
         author='Raphael Romann',
         description = "A Tracker for your daily consums for different things",
         options = {"build_exe": build_exe_options},
