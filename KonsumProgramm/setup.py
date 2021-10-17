@@ -29,7 +29,7 @@ if sys.platform == "win32":
     base = "Win32GUI"
 
 build_exe_options = {"build_exe":"../dist",
-                     "include_files":["KonsumProgramm/consum.ui",
+                     "include_files":["consum.ui",
                                       "Icon_Main.jpg"],
 		             "excludes":["tkinter"],
                     }

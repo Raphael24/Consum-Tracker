@@ -27,8 +27,11 @@ class ConsumUI(QtWidgets.QDialog):  #class ConsumUI
         consumlogger.info("consum.ui load succesfully")
         self.setWindowTitle("Cunsum Tracker")
 
+        print('OK')
+        print(db.init_GUI()[0])
         self.i_consum = db.init_GUI()[0]
         self.str_currentDatabase = db.init_GUI()[1]
+
         self.i_consum_total = db.read_total_consum_of_item(self.str_currentDatabase)
         self.i_consum_total = db.read_total_consum_of_item(self.str_currentDatabase)
         self.i_consum_month = db.read_consum_per_month(self.str_currentDatabase)
@@ -41,6 +44,8 @@ class ConsumUI(QtWidgets.QDialog):  #class ConsumUI
 
         #Init Input
         self.ui.I_DeleteDate.setDate(QDate.currentDate())
+        consumlogger.info("INIT: init Labels and Input done")
+
 
         #Init Combobox
         self.init_ComboBox_Database()
@@ -50,6 +55,7 @@ class ConsumUI(QtWidgets.QDialog):  #class ConsumUI
         self.ui.Btn_Consum.clicked.connect(self.Consum)
         self.ui.Btn_Exit.clicked.connect(self.Exit)
         self.ui.Btn_LoadData.clicked.connect(self.loadData)
+        consumlogger.info("INIT: Btn DB done")
 
         # Buttons Log
         self.ui.Btn_ShowLogMain.clicked.connect(lambda: self.show_log(0))
@@ -57,6 +63,7 @@ class ConsumUI(QtWidgets.QDialog):  #class ConsumUI
         self.ui.Btn_DeleteMain.clicked.connect(lambda: self.delete_log(0))
         self.ui.Btn_DeleteDB.clicked.connect(lambda: self.delete_log(1))
         self.ui.Btn_ClearLog.clicked.connect(self.clear_log)
+        consumlogger.info("INIT: Btn Log done")
 
         #Buttons Admin
         self.ui.Btn_admin_Insertdata.clicked.connect(db.insert)
@@ -65,15 +72,18 @@ class ConsumUI(QtWidgets.QDialog):  #class ConsumUI
         self.ui.Btn_Test1.clicked.connect(self.Test1)
         self.ui.Btn_LoadDataAdmin.clicked.connect(self.LoadDataAdmin)
         self.ui.Btn_admin_delFullDatabase.clicked.connect(self.deletFullData)
+        consumlogger.info("INIT: Btn Admin done")
 
         #Buttons Settings
         self.ui.Btn_CreateDatabase.clicked.connect(self.createDatabase)
+        consumlogger.info("INIT: Btn Settings done")
 
         #Init Table widget
         Headers = ["Datenbank", "Datum", "Anzahl Konsume"]
         self.TW_Datenbank.setColumnCount(len(Headers))
         self.TW_Datenbank.setRowCount(1)
         self.TW_Datenbank.setHorizontalHeaderLabels(Headers)
+        consumlogger.info("INIT: table Widget done ")
         self.loadData()
 
         #Init Table Widget Admin
@@ -81,6 +91,7 @@ class ConsumUI(QtWidgets.QDialog):  #class ConsumUI
         self.TW_DatenbankAdmin.setColumnCount(len(Headers))
         self.TW_DatenbankAdmin.setRowCount(1)
         self.TW_DatenbankAdmin.setHorizontalHeaderLabels(Headers)
+        consumlogger.info("INIT: Table Widget Admin")
         self.LoadDataAdmin()
 
         consumlogger.info("INIT: done")
@@ -96,14 +107,19 @@ class ConsumUI(QtWidgets.QDialog):  #class ConsumUI
         self.ui.CB_Database.clear()
         self.ui.CB_DeleteData.clear()
         self.ui.CB_DeleteFullData.clear()
+        consumlogger.info("INIT COMBOBOX: Start")
         data = db.read_items()
+        consumlogger.info("INIT COMBOBOX: read items")
         for n in data:
             self.ui.CB_DeleteData.addItem(n[0])
             self.ui.CB_Database.addItem(n[0])
             self.ui.CB_DeleteFullData.addItem(n[0])
+
+        consumlogger.info("INIT COMBOBOX: write items to the CB items: " + str(self.str_currentDatabase))
+        self.ui.CB_Database.setCurrentText(str(self.str_currentDatabase))
+        consumlogger.info("INIT COMBOBOX: set currentDatabase: " + str(self.str_currentDatabase))
+        self.ui.L_title.setText("Consum Tracker - " + str(self.str_currentDatabase))
         consumlogger.info("INIT COMBOBOX: done")
-        self.ui.CB_Database.setCurrentText(self.str_currentDatabase)
-        self.ui.L_title.setText("Consum Tracker - " + self.str_currentDatabase)
 
     def changeDatabase(self):
         item = self.ui.CB_Database.currentText()
@@ -147,7 +163,14 @@ class ConsumUI(QtWidgets.QDialog):  #class ConsumUI
 
     def loadData(self):
         #print('load data')                                                         #load data for the Homepage
+        consumlogger.info("loaddata: Start readconsum: ")
         data = db.read_consum()
+        consumlogger.info("loaddata: Run Ok readconsum: ")
+        consumlogger.info("loaddata: No data avaible: " + str(data))
+        if data == 0:
+            consumlogger.info("loaddata: No data avaible(if==0): " + str(data))
+            return 0
+
         AllItems = []
 
         for kategorie in data:

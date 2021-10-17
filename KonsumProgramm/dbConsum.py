@@ -111,7 +111,18 @@ def newDatabase(item):
 def read_items():
     cur.execute("SELECT item FROM consum GROUP BY item")
     data = cur.fetchall()
-    return data
+    consumlogger.info("READ ITEMSE: Succesfulls")
+    if data is None:
+        consumlogger.info("read items: Data is none")
+        a = ''
+        return a
+    elif data == '':
+        consumlogger.info("read items: Data is ''")
+        return ''
+    else:
+        consumlogger.info("read items: Data ", type(data) )
+        return data
+
 
 
 def read_consum_Admin():
@@ -122,7 +133,14 @@ def read_consum_Admin():
 
 def read_consum():
     consums = []
+    consumlogger.info("read_consum: read_items")
     items = read_items()
+    consumlogger.info("read_consum:  succesfully")
+    consumlogger.info("read_consum:  shoe type", type(items))
+
+    if items == 0:
+        return 0
+
     len_items = len(items)
     item = items[0]                                                             #eine liste in der jede Kategorie genau einmal enthält
 
@@ -132,6 +150,7 @@ def read_consum():
         cur.execute("SELECT item, MAX(NumbOfConsum), tag FROM consum WHERE item=:item GROUP BY tag", {"item" : item})
         data = cur.fetchall()
         consums.append(data)
+
     return consums
 
 
@@ -209,6 +228,7 @@ def init_GUI():
         initlist.append(data[0])
         initlist.append(item)
 
+
         if item is None:
             print('Type = None')
             initlist[1] = 0
@@ -217,21 +237,24 @@ def init_GUI():
             print('Type = tupel')
             if item[0] == '':
                 print('Tupel: no data')
-                initlist[1] = 0
+                initlist[1] = ''
             else:
+                print('Tupel: has data')
                 initlist[1] = item[0]
 
         if data[0] == None:
             initlist[0] = 0
 
-        else:
-            return initlist
+        print('return', initlist)
+        return initlist
 
     except:
+        print('ok')
         consumlogger.error("INIT GUI: FAIL (Database not Load) ")
         return 0
 
 
-#init_GUI()
+a = init_GUI()
+print(a)
 #insert()
 #insert_Consum(5)
