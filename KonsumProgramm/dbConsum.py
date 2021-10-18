@@ -100,6 +100,7 @@ def newDatabase(item):
         else:
             #print("Datensatz bereits Vorhanden")
             consumlogger.info("INSERT NEW DATABASE: " + item + " ist bereits vorhanden")
+            return False
     except:
         consumlogger.error("INSERT NEW DATABASE: Ein Problem trat auf -> Rollback")
         #print("INSERT NEW DATABASE: Ein Problem trat auf -> Rollback")
@@ -111,47 +112,43 @@ def newDatabase(item):
 def read_items():
     cur.execute("SELECT item FROM consum GROUP BY item")
     data = cur.fetchall()
-    consumlogger.info("READ ITEMSE: Succesfulls")
-    if data is None:
-        consumlogger.info("read items: Data is none")
-        a = ''
-        return a
-    elif data == '':
-        consumlogger.info("read items: Data is ''")
-        return ''
-    else:
-        consumlogger.info("read items: Data ", type(data) )
+    print('read_items: ', data)
+    if len(data) == 0:
+        consumlogger.info("READ ITEMS: No data")
+        data.insert(0, '')
         return data
-
+    else:
+        consumlogger.info("READ ITEMS: Succesfulls")
+        return data
 
 
 def read_consum_Admin():
     cur.execute("SELECT item, NumbOfConsum, datum, tag FROM consum ORDER BY item ASC ")
     data = cur.fetchall()
+
+    print('read_consum_Admin', data)
+    if data is None:
+        return []
+
     return data
 
 
 def read_consum():
     consums = []
-    consumlogger.info("read_consum: read_items")
     items = read_items()
-    consumlogger.info("read_consum:  succesfully")
-    consumlogger.info("read_consum:  shoe type", type(items))
-
-    if items == 0:
-        return 0
-
     len_items = len(items)
-    item = items[0]                                                             #eine liste in der jede Kategorie genau einmal enthält
+    item = items[0]
 
-    for i in range(0, len_items):                                               #durchläuft die verschiedenen Kategorien und sucht den maximalwert der Spalte "NumbOfConsum"
-        item = items[i]
-        item = item[0]
-        cur.execute("SELECT item, MAX(NumbOfConsum), tag FROM consum WHERE item=:item GROUP BY tag", {"item" : item})
-        data = cur.fetchall()
-        consums.append(data)
-
-    return consums
+    if item == '':
+        return consums
+    else:
+        for i in range(0, len_items):                                               #durchläuft die verschiedenen Kategorien und sucht den maximalwert der Spalte "NumbOfConsum"
+            item = items[i]
+            item = item[0]
+            cur.execute("SELECT item, MAX(NumbOfConsum), tag FROM consum WHERE item=:item GROUP BY tag", {"item" : item})
+            data = cur.fetchall()
+            consums.append(data)
+        return consums                                                          #eine liste in der jede Kategorie genau einmal enthält
 
 
 def read_test():
@@ -173,8 +170,7 @@ def read_consum_of_item(item):
 def read_total_consum_of_item(item):
     cur.execute("SELECT SUM(NumbOfConsum) FROM consum WHERE item=:item", {"item" : item})
     data = cur.fetchone()
-
-    if data is None:
+    if data[0] is None:
         return 0
     else:
         return data[0]
@@ -182,8 +178,10 @@ def read_total_consum_of_item(item):
 def read_consum_per_month(item):
     cur.execute("SELECT SUM(NumbOfConsum) FROM consum WHERE strftime('%m', tag) =:month AND item=:item", {"item" : item, "month" : akt_monat})
     data = cur.fetchone()
-    print(data)
-    return data[0]
+    if data[0] is None:
+        return 0
+    else:
+        return data[0]
 
 #a = read_consum_per_month('furz')
 #print(a)
@@ -214,7 +212,7 @@ def delete_admin(item):
         connection.rollback()
         consumlogger.error("DELETE FULL DATABASE: Ein Problem trat auf -> Rollback")
         return 0
-
+#delete_admin('')
 
 def init_GUI():
     initlist = []
@@ -224,37 +222,37 @@ def init_GUI():
 
         cur.execute("SELECT item FROM consum ")
         item = cur.fetchone()
-
+        #print("Item: ", item, type(item))
         initlist.append(data[0])
         initlist.append(item)
 
-
         if item is None:
-            print('Type = None')
-            initlist[1] = 0
+            #print('Type = None')
+            initlist[1] = ''
 
         if isinstance(item, tuple):
-            print('Type = tupel')
+            #print('Type = tupel')
             if item[0] == '':
-                print('Tupel: no data')
+                #print('Tupel: no data')
                 initlist[1] = ''
             else:
-                print('Tupel: has data')
+                #print('Tupel: has data')
                 initlist[1] = item[0]
 
         if data[0] == None:
             initlist[0] = 0
+            return initlist
 
-        print('return', initlist)
-        return initlist
+        else:
+            return initlistt
 
     except:
-        print('ok')
         consumlogger.error("INIT GUI: FAIL (Database not Load) ")
-        return 0
+        a = [0, '']
+        return a
 
 
-a = init_GUI()
-print(a)
+#a = init_GUI()
+#print(a)
 #insert()
 #insert_Consum(5)

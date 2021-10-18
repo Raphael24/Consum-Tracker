@@ -24,7 +24,7 @@
   </property>
   <property name="windowIcon">
    <iconset>
-    <normaloff>../Icon_Main.jpg</normaloff>../Icon_Main.jpg</iconset>
+    <normaloff>Icon_Main.jpg</normaloff>Icon_Main.jpg</iconset>
   </property>
   <property name="styleSheet">
    <string notr="true">background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:1, stop:0 rgba(60, 137, 194, 255), stop:1 rgba(255, 255, 255, 255));
@@ -57,7 +57,7 @@ gridline-color: rgb(85, 170, 255);
 </string>
      </property>
      <property name="currentIndex">
-      <number>2</number>
+      <number>0</number>
      </property>
      <property name="movable">
       <bool>true</bool>
@@ -435,14 +435,17 @@ border-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:0, stop:0 rgba(0,
         <string>Erstellen</string>
        </property>
       </widget>
-      <widget class="QLabel" name="L_Arsch">
+      <widget class="QLabel" name="L_InsertDBNameFail">
        <property name="geometry">
         <rect>
-         <x>140</x>
-         <y>100</y>
-         <width>381</width>
-         <height>151</height>
+         <x>110</x>
+         <y>50</y>
+         <width>181</width>
+         <height>21</height>
         </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:0, stop:0 rgba(0, 0, 0, 0), stop:1 rgba(255, 255, 255, 255));</string>
        </property>
        <property name="text">
         <string/>

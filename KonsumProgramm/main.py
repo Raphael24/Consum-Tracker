@@ -41,10 +41,12 @@ class ConsumUI(QtWidgets.QDialog):  #class ConsumUI
         self.L_ConsumToday.setText(str(self.i_consum))
         self.L_ConsumTotal.setText(str(self.i_consum_total))
         self.L_ConsumMonth.setText(str(self.i_consum_month))
+        self.L_InsertDBNameFail.setText('Bitte geben Sie einen Namen ein')
 
         #Init Input
         self.ui.I_DeleteDate.setDate(QDate.currentDate())
         consumlogger.info("INIT: init Labels and Input done")
+        print("INIT: init Labels and Input done")
 
 
         #Init Combobox
@@ -56,6 +58,7 @@ class ConsumUI(QtWidgets.QDialog):  #class ConsumUI
         self.ui.Btn_Exit.clicked.connect(self.Exit)
         self.ui.Btn_LoadData.clicked.connect(self.loadData)
         consumlogger.info("INIT: Btn DB done")
+        print("INIT: Btn DB done")
 
         # Buttons Log
         self.ui.Btn_ShowLogMain.clicked.connect(lambda: self.show_log(0))
@@ -64,6 +67,7 @@ class ConsumUI(QtWidgets.QDialog):  #class ConsumUI
         self.ui.Btn_DeleteDB.clicked.connect(lambda: self.delete_log(1))
         self.ui.Btn_ClearLog.clicked.connect(self.clear_log)
         consumlogger.info("INIT: Btn Log done")
+        print("INIT: Btn Log done")
 
         #Buttons Admin
         self.ui.Btn_admin_Insertdata.clicked.connect(db.insert)
@@ -73,18 +77,21 @@ class ConsumUI(QtWidgets.QDialog):  #class ConsumUI
         self.ui.Btn_LoadDataAdmin.clicked.connect(self.LoadDataAdmin)
         self.ui.Btn_admin_delFullDatabase.clicked.connect(self.deletFullData)
         consumlogger.info("INIT: Btn Admin done")
+        print("INIT: Btn Admin done")
 
         #Buttons Settings
         self.ui.Btn_CreateDatabase.clicked.connect(self.createDatabase)
         consumlogger.info("INIT: Btn Settings done")
+        print("INIT: Btn Settings done")
 
         #Init Table widget
         Headers = ["Datenbank", "Datum", "Anzahl Konsume"]
         self.TW_Datenbank.setColumnCount(len(Headers))
         self.TW_Datenbank.setRowCount(1)
         self.TW_Datenbank.setHorizontalHeaderLabels(Headers)
-        consumlogger.info("INIT: table Widget done ")
         self.loadData()
+        consumlogger.info("INIT: table Widget done ")
+        print("INIT: table Widget done ")
 
         #Init Table Widget Admin
         Headers = ["Datenbank", "Datum", "Anzahl Konsume", "Tag"]
@@ -93,33 +100,39 @@ class ConsumUI(QtWidgets.QDialog):  #class ConsumUI
         self.TW_DatenbankAdmin.setHorizontalHeaderLabels(Headers)
         consumlogger.info("INIT: Table Widget Admin")
         self.LoadDataAdmin()
+        print("INIT: Table Widget Admin")
 
         consumlogger.info("INIT: done")
-
-    def fake(self):
-        pass
 
 
     #---- Combobox -------------------------------------------------------------
 
 
     def init_ComboBox_Database(self):
+        consumlogger.info("INIT COMBOBOX: Start")
         self.ui.CB_Database.clear()
         self.ui.CB_DeleteData.clear()
         self.ui.CB_DeleteFullData.clear()
-        consumlogger.info("INIT COMBOBOX: Start")
-        data = db.read_items()
-        consumlogger.info("INIT COMBOBOX: read items")
-        for n in data:
-            self.ui.CB_DeleteData.addItem(n[0])
-            self.ui.CB_Database.addItem(n[0])
-            self.ui.CB_DeleteFullData.addItem(n[0])
 
         consumlogger.info("INIT COMBOBOX: write items to the CB items: " + str(self.str_currentDatabase))
         self.ui.CB_Database.setCurrentText(str(self.str_currentDatabase))
         consumlogger.info("INIT COMBOBOX: set currentDatabase: " + str(self.str_currentDatabase))
         self.ui.L_title.setText("Consum Tracker - " + str(self.str_currentDatabase))
+
+        data = db.read_items()
+        #print('INIT COMBOBOX: ', data)
+        if data[0] != '':
+            consumlogger.info("INIT COMBOBOX: read items")
+            for n in data:
+                #print("INIT COMBOBOX: n", n, n[0])
+                self.ui.CB_DeleteData.addItem(n[0])
+                self.ui.CB_Database.addItem(n[0])
+                self.ui.CB_DeleteFullData.addItem(n[0])
+        else:
+            consumlogger.info("INIT COMBOBOX: No Data avaible")
+
         consumlogger.info("INIT COMBOBOX: done")
+
 
     def changeDatabase(self):
         item = self.ui.CB_Database.currentText()
@@ -142,20 +155,25 @@ class ConsumUI(QtWidgets.QDialog):  #class ConsumUI
 
 
     def Consum(self): # Consum on the Homepage +1
-        self.i_consum += 1
-        db.insert_Consum(self.i_consum, self.str_currentDatabase)
+        if self.str_currentDatabase == '':
+            print('CONSUM: No data')
+            consumlogger.info("Consumcounter: Keine Daten Vorhanden")
+        else:
+            self.i_consum += 1
+            db.insert_Consum(self.i_consum, self.str_currentDatabase)
+            # TODO: eingabe überprüfen str_currentDatabase darf kein leerer string sein
 
-        self.i_consum_total = db.read_total_consum_of_item(self.str_currentDatabase)
-        self.i_consum_month = db.read_consum_per_month(self.str_currentDatabase)
+            self.i_consum_total = db.read_total_consum_of_item(self.str_currentDatabase)
+            self.i_consum_month = db.read_consum_per_month(self.str_currentDatabase)
 
-        self.L_NumbOfConsum.setText(str(self.i_consum))
-        self.L_ConsumToday.setText(str(self.i_consum))
-        self.L_ConsumMonth.setText(str(self.i_consum_month))
-        self.L_ConsumTotal.setText(str(self.i_consum_total))
-        self.loadData()
-        self.LoadDataAdmin()
-        print(self.str_currentDatabase)
-        consumlogger.info("Consumcounter: " + str(self.i_consum))
+            self.L_NumbOfConsum.setText(str(self.i_consum))
+            self.L_ConsumToday.setText(str(self.i_consum))
+            self.L_ConsumMonth.setText(str(self.i_consum_month))
+            self.L_ConsumTotal.setText(str(self.i_consum_total))
+            self.loadData()
+            self.LoadDataAdmin()
+            print(self.str_currentDatabase)
+            consumlogger.info("Consumcounter: " + str(self.i_consum))
 
 
     #---- Read Data ------------------------------------------------------------
@@ -198,8 +216,9 @@ class ConsumUI(QtWidgets.QDialog):  #class ConsumUI
 
     def LoadDataAdmin(self):
         data = db.read_consum_Admin()
+        print('Admin OK')
         self.TW_DatenbankAdmin.setRowCount(len(data))                              #calculate the number of rows
-        #print("Check 1")
+        print("Check 1")
         for n in range(0, len(data)):                                           #Fill the data in the Table widget
             y = n
             items = data[n]                                                     #read a single item from List [(...),(...),(...)]
@@ -207,8 +226,8 @@ class ConsumUI(QtWidgets.QDialog):  #class ConsumUI
             numb = str(items[1])                                                #read the item on position number 1 (x, y, z)
             timestamp = items[2]
             tag = items[3]
-            #print("Item: ",item, "Number:",numb,"Time: ",timestamp)             #log Message
-            #print("TAG", items[3], type(items[3]))
+            print("Item: ",item, "Number:",numb,"Time: ",timestamp)             #log Message
+            print("TAG", items[3], type(items[3]))
             items = [item, timestamp, numb, tag]                                     #a list of all items from one queue
             for m in range(0,4):                                                # write the items in the table Widget
                 Qitem = QtWidgets.QTableWidgetItem(items[m])
@@ -220,17 +239,24 @@ class ConsumUI(QtWidgets.QDialog):  #class ConsumUI
 
     def createDatabase(self):
         name = self.ui.LE_NameDatabase.text()
-        print('Start', name, str(name), type(name))
+
+        #print('Create database: ', name, type(name))
         if name == "" or name == " ":
-            print('fail')
+            self.L_InsertDBNameFail.setText('Bitte einen Namen eingeben')
             consumlogger.info("Creating Database failed: No item selected")
-            self.L_InputDataFail.setText('Bitte einen Namen eingeben')
         else:
-            print('siccess')
-            db.newDatabase(name)
-            self.init_ComboBox_Database()
-            consumlogger.info("Create Database: " + name )
-            self.L_InputDataFail.setText('')
+            print('Create database: Name is Valid', type(name))
+            a = db.newDatabase(name)
+
+            if a == False:
+                self.L_InsertDBNameFail.setText(str(name) +' ist bereits vorhanden.')
+                consumlogger.info("Create database: " + name + " ist bereits vorhanden")
+            else:
+                self.init_ComboBox_Database()
+                self.L_InsertDBNameFail.setText(str(name) +' wurde erfolgreich erstellt')
+                self.ui.LE_NameDatabase.setText('')
+                consumlogger.info("Create database: " + name )
+                print("Create database: OK")
 
     #---- Delete Data ----------------------------------------------------------
 
