@@ -35,9 +35,10 @@ class ConsumUI(QtWidgets.QDialog):  #class ConsumUI
         self.i_consum_total = db.read_total_consum_of_item(self.str_currentDatabase)
         self.i_consum_total = db.read_total_consum_of_item(self.str_currentDatabase)
         self.i_consum_month = db.read_consum_per_month(self.str_currentDatabase)
+        consumlogger.info("INIT: Variablen OK")
 
         #Init Labels
-        self.L_NumbOfConsum.setText(str(self.i_consum))
+        self.L_NumbOfConsum.setText(str(self.i_consum)))
         self.L_ConsumToday.setText(str(self.i_consum))
         self.L_ConsumTotal.setText(str(self.i_consum_total))
         self.L_ConsumMonth.setText(str(self.i_consum_month))
@@ -183,8 +184,6 @@ class ConsumUI(QtWidgets.QDialog):  #class ConsumUI
         #print('load data')                                                         #load data for the Homepage
         consumlogger.info("loaddata: Start readconsum: ")
         data = db.read_consum()
-        consumlogger.info("loaddata: Run Ok readconsum: ")
-        consumlogger.info("loaddata: No data avaible: " + str(data))
         if data == 0:
             consumlogger.info("loaddata: No data avaible(if==0): " + str(data))
             return 0
@@ -216,9 +215,7 @@ class ConsumUI(QtWidgets.QDialog):  #class ConsumUI
 
     def LoadDataAdmin(self):
         data = db.read_consum_Admin()
-        print('Admin OK')
         self.TW_DatenbankAdmin.setRowCount(len(data))                              #calculate the number of rows
-        print("Check 1")
         for n in range(0, len(data)):                                           #Fill the data in the Table widget
             y = n
             items = data[n]                                                     #read a single item from List [(...),(...),(...)]
@@ -226,8 +223,8 @@ class ConsumUI(QtWidgets.QDialog):  #class ConsumUI
             numb = str(items[1])                                                #read the item on position number 1 (x, y, z)
             timestamp = items[2]
             tag = items[3]
-            print("Item: ",item, "Number:",numb,"Time: ",timestamp)             #log Message
-            print("TAG", items[3], type(items[3]))
+            #print("Item: ",item, "Number:",numb,"Time: ",timestamp)             #log Message
+            #print("TAG", items[3], type(items[3]))
             items = [item, timestamp, numb, tag]                                     #a list of all items from one queue
             for m in range(0,4):                                                # write the items in the table Widget
                 Qitem = QtWidgets.QTableWidgetItem(items[m])
